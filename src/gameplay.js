@@ -115,10 +115,10 @@ Gameplay.prototype = {
         this.developers.push(newDev);
 
         var devHealthBar = this.game.add.sprite(newDev.x - 16, newDev.y - 32, 'sheet', 29);
-        devHealthBar.tint = 0x333333;
+        devHealthBar.tint = 0x191919;
         var movingBit = devHealthBar.addChild(this.game.add.sprite(1, 31, 'sheet', 29));
         movingBit.anchor.y = 1;
-        movingBit.tint = 0x7777FF;
+        movingBit.tint = 0x77beFF;
         movingBit.width = 14;
         movingBit.height = 30;
         newDev.bar = movingBit;
@@ -141,6 +141,10 @@ Gameplay.prototype = {
     this.playerSprite.anchor.setTo(0.5, 0);
     this.playerSprite.animations.add('run', [0, 1], 7, true);
     this.playerSprite.animations.play('run');
+
+    var progressText = this.game.add.bitmapText(14 * 16 + 16, 16 + 0.75, 'font', 'PROGRESS', 8);
+    progressText.tint = 0x000000;
+    progressText.cacheAsBitmap = true;
 
     this.targetPlayerIndex = 0;
     this.movingForward = true;
