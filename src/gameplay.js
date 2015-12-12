@@ -17,8 +17,8 @@ Gameplay.prototype = {
   playerCloseDistance: 8,
   initialDevMotivation: 20,
   baseDevMotiovationScale: 1.5,
-  baseDevProgressValue: 0.01,
-  baseDevProgressInterval: 700, // ms
+  baseDevProgressValue: 0.007,
+  baseDevProgressInterval: 1000, // ms
   maxDevMotivation: 20,
   motivationPerPress: 1.5,
   cartPalette: [0x0078ff, 0x6b76ff, 0x005e00, 0x4d00c8, 0xff0000, 0x00c500],
@@ -53,9 +53,22 @@ Gameplay.prototype = {
     }
 
     if (Phaser.Point.distance(this.player.position, closestDev.position) < 32) {
-      closestDev.motivation = Math.min(this.maxDevMotivation, closestDev.motivation + this.motivationPerPress);
+      if (closestDev.demodivated) {
+        closestDev.motivation = Math.max(0, closestDev.motivation - this.motivationPerPress);
+        if (closestDev.motivation === 0) {
+          closestDev.demodivated = false;
+          closestDev.motivation = this.maxDevMotivation;
+          closestDev.frame = 12;
+          closestDev.bar.tint = 0x77beFF;
+          closestDev.startWorking();
+        }
+      } else {
+        closestDev.motivation = Math.min(this.maxDevMotivation, closestDev.motivation + this.motivationPerPress);
+      }
 
       this.playerSprite.animations.play('encourage');
+
+      this.encourageSounds[~~(Math.random() * this.encourageSounds.length)].play();
 
       this.yayEmitter.emitParticle();
 
@@ -74,8 +87,6 @@ Gameplay.prototype = {
         textTween.start();
       }
     }
-
-    this.encourageSounds[~~(Math.random() * this.encourageSounds.length)].play();
   },
 
   reverseDirection: function () {
@@ -240,7 +251,8 @@ Gameplay.prototype = {
         this.game.physics.arcade.enable(newDev);
         newDev.body.setSize(16, 16);
         newDev.anchor.setTo(0.5, 0);
-        newDev.motivation = 20;
+        newDev.motivation = this.maxDevMotivation;
+        newDev.demodivated = false;
         newDev.motivationScale = this.baseDevMotiovationScale + Math.random() * 0.45 - 0.234;
         newDev.progressValue = this.baseDevProgressValue;
         newDev.progressInterval = this.baseDevProgressInterval + (Math.random() * 600 - 300);
@@ -251,6 +263,7 @@ Gameplay.prototype = {
 
           var bobbed = false;
           var initY = newDev.y;
+          newDev.initY = initY;
           newDev.workLoop = that.game.time.events.loop(newDev.progressInterval, function() {
             that.addGameProgress( newDev.progressValue );
             var newGlimmer = that.workGlimmers.getFirstDead();
@@ -271,6 +284,7 @@ Gameplay.prototype = {
         newDev.stopWorking = function () {
           that.game.time.events.remove(newDev.workLoop);
           that.game.time.events.remove(newDev.bobLoop);
+          newDev.y = newDev.initY;
           newDev.workLoop = null;
         };
         newDev.events.onKilled.add(function () { this.stopWorking(); this.healthBar.kill(); }, newDev);
@@ -411,12 +425,16 @@ Gameplay.prototype = {
 
     if (this.currentState === 'gameplay') {
       this.developers.forEach(function(dev) {
-        if (dev.motivation > 0) {
+        dev.bar.height = Math.max(30 * dev.motivation / 20, 1);
+
+        if (dev.motivation > 0 && dev.demodivated === false) {
           dev.motivation -= this.game.time.physicsElapsed * dev.motivationScale;
-          dev.bar.height = 30 * dev.motivation / 20;
-        } else {
+        } else if (dev.motivation <= 0 && dev.demodivated === false) {
           dev.stopWorking();
-          dev.kill();
+          dev.demodivated = true;
+          dev.frame = 13;
+          dev.motivation = 10;
+          dev.bar.tint = 0xb80000;
         }
       }, this);
 
