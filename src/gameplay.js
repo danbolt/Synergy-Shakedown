@@ -5,6 +5,7 @@ Gameplay.prototype = {
 
   developers: null,
   player: null,
+  playerSprite: null,
 
   developerCount: 6,
   playerMoveSpeed: 200,
@@ -61,6 +62,11 @@ Gameplay.prototype = {
     this.game.physics.arcade.enable(this.player);
     this.player.body.setSize(16, 16);
 
+    this.playerSprite = this.game.add.sprite(64, 64, 'sheet', 0);
+    this.playerSprite.anchor.setTo(0.5, 1);
+    this.playerSprite.animations.add('run', [0, 1], 7, true);
+    this.playerSprite.animations.play('run');
+
     this.motivateKey = this.game.input.keyboard.addKey(Phaser.KeyCode.C);
     this.motivateKey.onDown.add(this.motivateDev, this);
     this.moveKey = this.game.input.keyboard.addKey(Phaser.KeyCode.X);
@@ -71,14 +77,16 @@ Gameplay.prototype = {
     this.developers = [];
     for (var i = 0; i < this.developerCount; i++) {
       var that = this;
-      var newDev = this.game.add.sprite(~~(this.game.width / 2 + 100 * (Math.cos(i / this.developerCount * Math.PI * 2))), ~~(this.game.height / 2 + 70 * (Math.sin(i / this.developerCount * Math.PI * 2))), null);
+      var newDev = this.game.add.sprite(~~(this.game.width / 2 + 100 * (Math.cos(i / this.developerCount * Math.PI * 2))), ~~(this.game.height / 2 + 70 * (Math.sin(i / this.developerCount * Math.PI * 2))), 'sheet', 12);
       this.game.physics.arcade.enable(newDev);
       newDev.body.setSize(16, 16);
+      newDev.anchor.setTo(0.5, 1);
       newDev.motivation = 20;
       newDev.motivationScale = this.baseDevMotiovationScale + Math.random() * 0.45 - 0.234;
       newDev.progressValue = this.baseDevProgressValue;
       newDev.progressInterval = this.baseDevProgressInterval + (Math.random() * 600 - 300);
       newDev.workLoop = null;
+      newDev.addChild(this.game.add.sprite(0, 0, 'sheet', ~~(8 + Math.random() * 4))).anchor.setTo(0.5, 1);
       newDev.startWorking = function () {
         if (newDev.workLoop !== null) { return; }
 
@@ -106,6 +114,7 @@ Gameplay.prototype = {
       Phaser.Point.subtract(target.position, this.player.position, this.player.body.velocity);
       this.player.body.velocity = Phaser.Point.normalize(this.player.body.velocity);
       this.player.body.velocity.setMagnitude(this.playerMoveSpeed);
+      this.playerSprite.scale.x = this.player.body.velocity.x > 0 ? 1 : -1;
     } else {
       this.player.body.velocity.set(0);
     }
@@ -129,6 +138,8 @@ Gameplay.prototype = {
     }, this);
 
     // round position values later
+    this.playerSprite.x = ~~(this.player.x);
+    this.playerSprite.y = ~~(this.player.y);
   },
   render: function () {
     this.game.debug.geom(new Phaser.Rectangle(0, 0, this.game.width, 16), '#333333');
@@ -138,13 +149,11 @@ Gameplay.prototype = {
       if (dev.alive === false) { return; }
       this.game.debug.geom(new Phaser.Rectangle(dev.x - 8, dev.y - 32, 8, 32), 'black');
       this.game.debug.geom(new Phaser.Rectangle(dev.x - 8, dev.y - 32, 8, 32 * (dev.motivation / 20)), 'red');
-      this.game.debug.body(dev, 'green');
     }, this);
-
-    this.game.debug.body(this.player, 'blue');
   },
   shutdown: function () {
     this.player = null;
+    this.playerSprite = null;
     this.developers = null;
 
     this.targetPlayerIndex = 0;

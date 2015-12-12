@@ -30,7 +30,9 @@ Preload.prototype = {
 var Load = function() {};
 Load.prototype = {
   preload: function() {
-    // Load game assets here
+    this.game.load.image('tileset', 'asset/tiles.png');
+
+    this.game.load.spritesheet('sheet', 'asset/spriteSheet.png', 16, 32);
   },
   create: function() {
     this.game.state.start('Gameplay');
