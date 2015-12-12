@@ -70,6 +70,15 @@ Gameplay.prototype = {
 
       this.encourageSounds[~~(Math.random() * this.encourageSounds.length)].play();
 
+
+      this.yayEmitter.setYSpeed(-100, -100);
+      this.yayEmitter.setXSpeed(-100, -100);
+      this.yayEmitter.emitParticle();
+      this.yayEmitter.setXSpeed(100, 100);
+      this.yayEmitter.emitParticle();
+      this.yayEmitter.setYSpeed(100, 100);
+      this.yayEmitter.emitParticle();
+      this.yayEmitter.setXSpeed(-100, -100);
       this.yayEmitter.emitParticle();
 
       var encourage = this.encourageWords.getFirstDead();
@@ -313,9 +322,8 @@ Gameplay.prototype = {
     this.yayEmitter.makeParticles('sheet', [24, 25]);
     this.yayEmitter.minRotation = 0;
     this.yayEmitter.maxRotation = 0;
-    this.yayEmitter.setYSpeed(-100, -150);
-    this.yayEmitter.setXSpeed(-150, 150);
-    this.yayEmitter.gravity = 120;
+    this.yayEmitter.gravity = 0;
+    this.yayEmitter.lifespan = 300;
 
     this.player = this.game.add.sprite(px, py + 16, undefined);
     this.game.physics.arcade.enable(this.player);
@@ -460,7 +468,7 @@ Gameplay.prototype = {
     this.playerSprite.x = ~~(this.player.x);
     this.playerSprite.y = ~~(this.player.y);
     this.yayEmitter.x = this.playerSprite.x;
-    this.yayEmitter.y = this.playerSprite.y;
+    this.yayEmitter.y = this.playerSprite.y + 32;
   },
   shutdown: function () {
     this.player = null;
