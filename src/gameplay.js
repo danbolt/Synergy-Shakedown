@@ -50,7 +50,7 @@ Gameplay.prototype = {
 
   addGameProgress: function (value) {
     if (this.gameProgress >= 1) { return; }
-    
+
     this.gameProgress += value;
   },
 
@@ -70,6 +70,7 @@ Gameplay.prototype = {
 
     this.developers = [];
     for (var i = 0; i < this.developerCount; i++) {
+      var that = this;
       var newDev = this.game.add.sprite(~~(this.game.width / 2 + 100 * (Math.cos(i / this.developerCount * Math.PI * 2))), ~~(this.game.height / 2 + 70 * (Math.sin(i / this.developerCount * Math.PI * 2))), null);
       this.game.physics.arcade.enable(newDev);
       newDev.body.setSize(16, 16);
@@ -77,8 +78,17 @@ Gameplay.prototype = {
       newDev.motivationScale = this.baseDevMotiovationScale + Math.random() * 0.45 - 0.234;
       newDev.progressValue = this.baseDevProgressValue;
       newDev.progressInterval = this.baseDevProgressInterval + (Math.random() * 600 - 300);
+      newDev.workLoop = null;
+      newDev.startWorking = function () {
+        if (newDev.workLoop !== null) { return; }
 
-      newDev.workLoop = this.game.time.events.loop(newDev.progressInterval, function() { this.addGameProgress( newDev.progressValue ); } , this);
+        newDev.workLoop = that.game.time.events.loop(newDev.progressInterval, function() { that.addGameProgress( newDev.progressValue ); }, that);
+      };
+      newDev.stopWorking = function () {
+        that.game.time.events.remove(newDev.workLoop);
+        newDev.workLoop = null;
+      };
+      newDev.startWorking();
 
       this.developers.push(newDev);
     }
@@ -113,7 +123,7 @@ Gameplay.prototype = {
       if (dev.motivation > 0) {
         dev.motivation -= this.game.time.physicsElapsed * dev.motivationScale;
       } else {
-        this.game.time.events.remove(dev.workLoop);
+        dev.stopWorking();
         dev.kill();
       }
     }, this);
