@@ -10,6 +10,7 @@ Gameplay.prototype = {
   guiSprites: null,
   workGlimmers: null,
   yayEmitter: null,
+  encourageWords: null,
 
   developerCount: 6,
   playerMoveSpeed: 200,
@@ -56,6 +57,21 @@ Gameplay.prototype = {
       this.playerSprite.animations.play('encourage');
 
       this.yayEmitter.emitParticle();
+
+      var encourage = this.encourageWords.getFirstDead();
+      if (encourage) {
+        encourage.x = this.playerSprite.x - 8 + ~~(Math.random() * 16);
+        encourage.y = this.playerSprite.y;
+        encourage.revive();
+        encourage.text = encourage.wordOptions[~~(Math.random() * encourage.wordOptions.length)];
+        encourage.text.align = 'center';
+        encourage.anchor.x = 0.5;
+        var ey = encourage.y;
+        var textTween = this.game.add.tween(encourage);
+        textTween.to({y: ey - 16}, 200);
+        textTween.onComplete.add(function() { encourage.kill(); });
+        textTween.start();
+      }
     }
   },
 
@@ -275,6 +291,9 @@ Gameplay.prototype = {
     this.yayEmitter.makeParticles('sheet', [24, 25]);
     this.yayEmitter.minRotation = 0;
     this.yayEmitter.maxRotation = 0;
+    this.yayEmitter.setYSpeed(-100, -150);
+    this.yayEmitter.setXSpeed(-150, 150);
+    this.yayEmitter.gravity = 120;
 
     this.player = this.game.add.sprite(px, py + 16, undefined);
     this.game.physics.arcade.enable(this.player);
@@ -338,6 +357,15 @@ Gameplay.prototype = {
       glimmer.tint = this.cartPalette[this.cartRoll];
       glimmer.alpha = 0.825;
       this.workGlimmers.add(glimmer);
+    }
+
+    var encouragement = ['yay', 'go go go', 'nice', 'good', 'ludum', 'ship', 'good', 'nice', 'yay', 'yay', 'woo', 'wow', 'good', 'great', 'yeah', 'game!', 'l33t', 'wow', 'nice', 'good', 'good work'];
+    this.encourageWords = this.game.add.group();
+    for (var i = 0; i < 10; i++) {
+      var word = this.game.add.bitmapText(0, 0, 'font', 'toto', 8);
+      word.wordOptions = encouragement;
+      word.kill();
+      this.encourageWords.add(word);
     }
 
     this.targetPlayerIndex = 0;
