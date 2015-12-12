@@ -65,11 +65,12 @@ TitleScreen.prototype = {
     var titleText = this.game.add.bitmapText(this.game.width / 2, this.game.height / 2 + 4, 'font', taglines[~~(Math.random() * taglines.length)], 8);
     titleText.anchor.x = 0.5;
     titleText.align = 'center';
+    titleText.tint = 0x00beff;
 
     var gameLogo = this.game.add.image(this.game.width / 2, this.game.height / 2, 'logo');
     gameLogo.anchor.setTo(0.5, 0.75);
 
-    var titleText2 = this.game.add.bitmapText(this.game.width / 2, this.game.height / 2 + 32, 'font', 'Hold X to move\ndouble tap X to turn around\n\nRapidly tap C to encourage a dev', 8);
+    var titleText2 = this.game.add.bitmapText(this.game.width / 2, this.game.height / 2 + 32, 'font', 'You are the dev team lead\nHold X to move\ndouble tap X to turn around\n\nRapidly tap C to encourage a dev', 8);
     titleText2.anchor.x = 0.5;
     titleText2.align = 'center';
     this.titleText2 = titleText2;
