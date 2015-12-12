@@ -99,10 +99,14 @@ Gameplay.prototype = {
         newDev.startWorking = function () {
           if (newDev.workLoop !== null) { return; }
 
+          var bobbed = false;
+          var initY = newDev.y;
           newDev.workLoop = that.game.time.events.loop(newDev.progressInterval, function() { that.addGameProgress( newDev.progressValue ); }, that);
+          newDev.bobLoop = that.game.time.events.loop(125, function () { bobbed = !bobbed; newDev.y = initY + (bobbed ? 1 : 0); }, that);
         };
         newDev.stopWorking = function () {
           that.game.time.events.remove(newDev.workLoop);
+          that.game.time.events.remove(newDev.bobLoop);
           newDev.workLoop = null;
         };
         newDev.startWorking();
