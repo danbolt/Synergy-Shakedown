@@ -7,6 +7,8 @@ Gameplay.prototype = {
   player: null,
   playerSprite: null,
 
+  guiSprites: null,
+
   developerCount: 6,
   playerMoveSpeed: 200,
   playerCloseDistance: 8,
@@ -58,14 +60,11 @@ Gameplay.prototype = {
   create: function () {
     this.game.stage.backgroundColor = '#DDDDDD';
 
-    this.player = this.game.add.sprite(64, 64, null);
-    this.game.physics.arcade.enable(this.player);
-    this.player.body.setSize(16, 16);
+    this.map = this.game.add.tilemap('level0');
+    this.map.addTilesetImage('tiles', 'tiles');
 
-    this.playerSprite = this.game.add.sprite(64, 64, 'sheet', 0);
-    this.playerSprite.anchor.setTo(0.5, 1);
-    this.playerSprite.animations.add('run', [0, 1], 7, true);
-    this.playerSprite.animations.play('run');
+    var backgroundLayer = this.map.createLayer('background');
+    var foregroundLayer = this.map.createLayer('foreground');
 
     this.motivateKey = this.game.input.keyboard.addKey(Phaser.KeyCode.C);
     this.motivateKey.onDown.add(this.motivateDev, this);
@@ -74,38 +73,78 @@ Gameplay.prototype = {
     this.game.input.gamepad.onDownCallback = function (buttonCode) { if (buttonCode === 4) { this.motivateDev(); } if (buttonCode === 5) { this.reverseDirection(); } };
     this.game.input.gamepad.callbackContext = this;
 
+    this.guiSprites = this.game.add.group();
+
+    var px = 0;
+    var py = 0;
+
     this.developers = [];
-    for (var i = 0; i < this.developerCount; i++) {
-      var that = this;
-      var newDev = this.game.add.sprite(~~(this.game.width / 2 + 100 * (Math.cos(i / this.developerCount * Math.PI * 2))), ~~(this.game.height / 2 + 70 * (Math.sin(i / this.developerCount * Math.PI * 2))), 'sheet', 12);
-      this.game.physics.arcade.enable(newDev);
-      newDev.body.setSize(16, 16);
-      newDev.anchor.setTo(0.5, 1);
-      newDev.motivation = 20;
-      newDev.motivationScale = this.baseDevMotiovationScale + Math.random() * 0.45 - 0.234;
-      newDev.progressValue = this.baseDevProgressValue;
-      newDev.progressInterval = this.baseDevProgressInterval + (Math.random() * 600 - 300);
-      newDev.workLoop = null;
-      newDev.addChild(this.game.add.sprite(0, 0, 'sheet', ~~(8 + Math.random() * 4))).anchor.setTo(0.5, 1);
-      newDev.startWorking = function () {
-        if (newDev.workLoop !== null) { return; }
+    this.map.objects.gameplay.forEach(function(mapObject) {
 
-        newDev.workLoop = that.game.time.events.loop(newDev.progressInterval, function() { that.addGameProgress( newDev.progressValue ); }, that);
-      };
-      newDev.stopWorking = function () {
-        that.game.time.events.remove(newDev.workLoop);
+      if (mapObject.name === 'Player') {
+        px = mapObject.x;
+        py = mapObject.y;
+      } else if (mapObject.name === 'Dev') {
+        var that = this;
+        var newDev = this.game.add.sprite(~~(mapObject.x + 8), ~~(mapObject.y), 'sheet', 12);
+        this.game.physics.arcade.enable(newDev);
+        newDev.body.setSize(16, 16);
+        newDev.anchor.setTo(0.5, 0);
+        newDev.motivation = 20;
+        newDev.motivationScale = this.baseDevMotiovationScale + Math.random() * 0.45 - 0.234;
+        newDev.progressValue = this.baseDevProgressValue;
+        newDev.progressInterval = this.baseDevProgressInterval + (Math.random() * 600 - 300);
         newDev.workLoop = null;
-      };
-      newDev.startWorking();
+        newDev.addChild(this.game.add.sprite(0, 0, 'sheet', ~~(8 + Math.random() * 4))).anchor.setTo(0.5, 0);
+        newDev.startWorking = function () {
+          if (newDev.workLoop !== null) { return; }
 
-      this.developers.push(newDev);
-    }
+          newDev.workLoop = that.game.time.events.loop(newDev.progressInterval, function() { that.addGameProgress( newDev.progressValue ); }, that);
+        };
+        newDev.stopWorking = function () {
+          that.game.time.events.remove(newDev.workLoop);
+          newDev.workLoop = null;
+        };
+        newDev.startWorking();
+        newDev.events.onKilled.add(function () { this.healthBar.kill(); }, newDev);
+
+        this.developers.push(newDev);
+
+        var devHealthBar = this.game.add.sprite(newDev.x - 16, newDev.y - 32, 'sheet', 29);
+        devHealthBar.tint = 0x333333;
+        var movingBit = devHealthBar.addChild(this.game.add.sprite(1, 31, 'sheet', 29));
+        movingBit.anchor.y = 1;
+        movingBit.tint = 0x7777FF;
+        movingBit.width = 14;
+        movingBit.height = 30;
+        newDev.bar = movingBit;
+        var flashingBar = devHealthBar.addChild(this.game.add.sprite(0, 0, 'sheet', 30));
+        flashingBar.animations.add('flicker', [30, 31], 12, true);
+        flashingBar.animations.play('flicker');
+        this.guiSprites.add(devHealthBar);
+        newDev.healthBar = devHealthBar;
+      }
+    }, this);
+
+    var cosmeticLayer = this.map.createLayer('cosmetic');
+
+    this.player = this.game.add.sprite(px, py + 16, undefined);
+    this.game.physics.arcade.enable(this.player);
+    this.player.body.setSize(16, 16);
+    this.player.renderable = false;
+
+    this.playerSprite = this.game.add.sprite(64, 64, 'sheet', 0);
+    this.playerSprite.anchor.setTo(0.5, 0);
+    this.playerSprite.animations.add('run', [0, 1], 7, true);
+    this.playerSprite.animations.play('run');
 
     this.targetPlayerIndex = 0;
     this.movingForward = true;
     this.timeSinceLastDownPress = 0;
   },
   update: function () {
+
+    this.game.world.bringToTop(this.player);
     this.timeSinceLastDownPress += this.game.time.physicsElapsedMS;
     // move toward the next developer
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.X) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_5)) {
@@ -131,6 +170,7 @@ Gameplay.prototype = {
     this.developers.forEach(function(dev) {
       if (dev.motivation > 0) {
         dev.motivation -= this.game.time.physicsElapsed * dev.motivationScale;
+        dev.bar.height = 30 * dev.motivation / 20;
       } else {
         dev.stopWorking();
         dev.kill();
@@ -144,17 +184,13 @@ Gameplay.prototype = {
   render: function () {
     this.game.debug.geom(new Phaser.Rectangle(0, 0, this.game.width, 16), '#333333');
     this.game.debug.geom(new Phaser.Rectangle(0, 0, this.game.width * this.gameProgress, 16), 'pink');
-
-    this.developers.forEach(function (dev) {
-      if (dev.alive === false) { return; }
-      this.game.debug.geom(new Phaser.Rectangle(dev.x - 8, dev.y - 32, 8, 32), 'black');
-      this.game.debug.geom(new Phaser.Rectangle(dev.x - 8, dev.y - 32, 8, 32 * (dev.motivation / 20)), 'red');
-    }, this);
   },
   shutdown: function () {
     this.player = null;
     this.playerSprite = null;
     this.developers = null;
+
+    this.guiSprites = null;
 
     this.targetPlayerIndex = 0;
 
