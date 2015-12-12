@@ -11,12 +11,15 @@ Gameplay.prototype = {
   playerCloseDistance: 8,
   initialDevMotivation: 20,
   baseDevMotiovationScale: 1.5,
+  baseDevProgressValue: 0.001,
+  baseDevProgressInterval: 700, // ms
   maxDevMotivation: 20,
   motivationPerPress: 1.5,
 
   targetPlayerIndex: 0,
   movingForward: false,
   timeSinceLastDownPress: 0,
+  gameProgress: 0, /* between 0 and 1 */
 
   motivateDev: function () {
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.X) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_5)) {
@@ -45,6 +48,12 @@ Gameplay.prototype = {
     this.timeSinceLastDownPress = 0;
   },
 
+  addGameProgress: function (value) {
+    if (this.gameProgress >= 1) { return; }
+    
+    this.gameProgress += value;
+  },
+
   create: function () {
     this.game.stage.backgroundColor = '#DDDDDD';
 
@@ -66,6 +75,10 @@ Gameplay.prototype = {
       newDev.body.setSize(16, 16);
       newDev.motivation = 20;
       newDev.motivationScale = this.baseDevMotiovationScale + Math.random() * 0.45 - 0.234;
+      newDev.progressValue = this.baseDevProgressValue;
+      newDev.progressInterval = this.baseDevProgressInterval + (Math.random() * 600 - 300);
+
+      newDev.workLoop = this.game.time.events.loop(newDev.progressInterval, function() { this.addGameProgress( newDev.progressValue ); } , this);
 
       this.developers.push(newDev);
     }
@@ -100,6 +113,7 @@ Gameplay.prototype = {
       if (dev.motivation > 0) {
         dev.motivation -= this.game.time.physicsElapsed * dev.motivationScale;
       } else {
+        this.game.time.events.remove(dev.workLoop);
         dev.kill();
       }
     }, this);
@@ -107,7 +121,8 @@ Gameplay.prototype = {
     // round position values later
   },
   render: function () {
-    this.game.debug.body(this.player, 'blue');
+    this.game.debug.geom(new Phaser.Rectangle(0, 0, this.game.width, 16), '#333333');
+    this.game.debug.geom(new Phaser.Rectangle(0, 0, this.game.width * this.gameProgress, 16), 'pink');
 
     this.developers.forEach(function (dev) {
       if (dev.alive === false) { return; }
@@ -115,6 +130,8 @@ Gameplay.prototype = {
       this.game.debug.geom(new Phaser.Rectangle(dev.x - 8, dev.y - 32, 8, 32 * (dev.motivation / 20)), 'red');
       this.game.debug.body(dev, 'green');
     }, this);
+
+    this.game.debug.body(this.player, 'blue');
   },
   shutdown: function () {
     this.player = null;
