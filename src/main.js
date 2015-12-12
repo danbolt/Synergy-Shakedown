@@ -4,7 +4,7 @@ Preload.prototype = {
     //
   },
   preload: function() {
-    //
+    this.game.load.bitmapFont('font', 'asset/bitmapFont/font.png', 'asset/bitmapFont/font.json');
   },
   create: function() {
     this.game.stage.backgroundColor = '#191919';
@@ -19,7 +19,10 @@ Preload.prototype = {
 
     PIXI.scaleModes.DEFAULT = PIXI.scaleModes.NEAREST; //for WebGL
 
-    // add preload animation assets here
+    var loadText = this.game.add.bitmapText(this.game.width / 2, this.game.height / 2 + 4, 'font', 'loading...', 8);
+    loadText.anchor.x = 0.5;
+    loadText.align = 'center';
+    this.game.time.events.loop(250, function () { loadText.renderable = !(loadText.renderable); });
 
     this.game.input.gamepad.start();
 
@@ -30,7 +33,6 @@ Preload.prototype = {
 var Load = function() {};
 Load.prototype = {
   preload: function() {
-    this.game.load.bitmapFont('font', 'asset/bitmapFont/font.png', 'asset/bitmapFont/font.json');
 
     this.game.load.audio('encourage0', 'asset/sfx/encourage0.wav');
     this.game.load.audio('encourage1', 'asset/sfx/encourage1.wav');
