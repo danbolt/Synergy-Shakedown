@@ -21,6 +21,8 @@ Preload.prototype = {
 
     // add preload animation assets here
 
+    this.game.input.gamepad.start();
+
     this.game.state.start('Load', false);
   }
 };
