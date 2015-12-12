@@ -51,6 +51,8 @@ Gameplay.prototype = {
 
     if (Phaser.Point.distance(this.player.position, closestDev.position) < 32) {
       closestDev.motivation = Math.min(this.maxDevMotivation, closestDev.motivation + this.motivationPerPress);
+
+      this.playerSprite.animations.play('encourage');
     }
   },
 
@@ -140,6 +142,8 @@ Gameplay.prototype = {
       }, this);
     }, this);
     moveTextDownTween.start();
+
+    this.playerSprite.animations.play('sad');
 
     this.game.time.events.remove(this.timeSubtractLoop);
     this.timerText.text = 'xxx';
@@ -272,6 +276,8 @@ Gameplay.prototype = {
     this.playerSprite = this.game.add.sprite(64, 64, 'sheet', 0);
     this.playerSprite.anchor.setTo(0.5, 0);
     this.playerSprite.animations.add('run', [0, 1], 7, true);
+    this.playerSprite.animations.add('encourage', [2, 3, 2, 3], 7, false);
+    this.playerSprite.animations.add('sad', [4, 5], 7, true);
     this.playerSprite.animations.play('run');
 
     var progressText = this.game.add.bitmapText(14 * 16 + 16, 0.75, 'font', 'PROGRESS', 8);
@@ -344,6 +350,8 @@ Gameplay.prototype = {
       this.player.body.velocity = Phaser.Point.normalize(this.player.body.velocity);
       this.player.body.velocity.setMagnitude(this.playerMoveSpeed);
       this.playerSprite.scale.x = this.player.body.velocity.x > 0 ? 1 : -1;
+
+      this.playerSprite.animations.play('run');
     } else {
       this.player.body.velocity.set(0);
     }
