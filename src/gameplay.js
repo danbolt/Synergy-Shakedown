@@ -31,6 +31,7 @@ Gameplay.prototype = {
   gameProgress: 0, /* between 0 and 1 */
   cartRoll: 0,
   timeLeft: 30,
+  currentRound: 0,
 
   motivateDev: function () {
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.X) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_5)) {
@@ -84,11 +85,11 @@ Gameplay.prototype = {
 
     this.getReadyText.text = 'THE DEVS ARE TIRED\n\nBUT WE GOTTA SHIP!!!';
     this.getReadyText.renderable = true;
-    this.getReadyText.y = -20;
+    this.getReadyText.y = -30;
     var moveTextDownTween = this.game.add.tween(this.getReadyText);
     moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
     var moveTextUpTween = this.game.add.tween(this.getReadyText);
-    moveTextUpTween.to({y: -20}, 350, undefined, false, 1500);
+    moveTextUpTween.to({y: -30}, 350, undefined, false, 1500);
     moveTextDownTween.chain(moveTextUpTween);
     moveTextUpTween.onComplete.add(function() {
       this.getReadyText.renderable = false;
@@ -105,6 +106,8 @@ Gameplay.prototype = {
 
     this.timeLeft = this.baseTimeLeft;
     this.timerText.text = this.timeLeft.toString();
+
+    this.roundText.text = this.currentRound.toString();
 
     this.currentState = 'getReady';
   },
@@ -123,11 +126,11 @@ Gameplay.prototype = {
 
     this.getReadyText.text = message;
     this.getReadyText.renderable = true;
-    this.getReadyText.y = -20;
+    this.getReadyText.y = -30;
     var moveTextDownTween = this.game.add.tween(this.getReadyText);
     moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
     var moveTextUpTween = this.game.add.tween(this.getReadyText);
-    moveTextUpTween.to({y: -20}, 350, undefined, false, 1500);
+    moveTextUpTween.to({y: -30}, 350, undefined, false, 1500);
     moveTextDownTween.chain(moveTextUpTween);
     moveTextUpTween.onComplete.add(function() {
       this.getReadyText.renderable = false;
@@ -148,11 +151,11 @@ Gameplay.prototype = {
 
     this.getReadyText.text = 'Nice one!\nNext game coming up!';
     this.getReadyText.renderable = true;
-    this.getReadyText.y = -20;
+    this.getReadyText.y = -30;
     var moveTextDownTween = this.game.add.tween(this.getReadyText);
     moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
     var moveTextUpTween = this.game.add.tween(this.getReadyText);
-    moveTextUpTween.to({y: -20}, 350, undefined, false, 1500);
+    moveTextUpTween.to({y: -30}, 350, undefined, false, 1500);
     moveTextDownTween.chain(moveTextUpTween);
     moveTextUpTween.onComplete.add(function() {
       this.getReadyText.renderable = false;
@@ -165,6 +168,8 @@ Gameplay.prototype = {
 
     this.game.time.events.remove(this.timeSubtractLoop);
     this.timerText.text = '---';
+
+    this.currentRound++;
 
     this.currentState = 'playerWinRound';
   },
@@ -186,6 +191,8 @@ Gameplay.prototype = {
     this.game.input.gamepad.callbackContext = this;
 
     this.guiSprites = this.game.add.group();
+
+    this.currentRound = 1;
 
     var px = 0;
     var py = 0;
@@ -296,6 +303,17 @@ Gameplay.prototype = {
     timerText.anchor.x = 0.5;
     timerTextLabel.addChild(timerText);
     this.timerText = timerText;
+
+    var roundTextLabel = this.game.add.bitmapText(14 * 16 + (this.game.width - (14 * 16)) / 2, this.game.height / 2 + 48, 'font', 'ROUND', 8);
+    roundTextLabel.align = 'center';
+    roundTextLabel.anchor.x = 0.5;
+    this.guiSprites.addChild(roundTextLabel);
+
+    var roundText = this.game.add.bitmapText(0, 16, 'font', '000', 8);
+    roundText.align = 'center';
+    roundText.anchor.x = 0.5;
+    roundTextLabel.addChild(roundText);
+    this.roundText = roundText;
 
     this.workGlimmers = this.game.add.group();
     for (var i = 0; i < 10; i++) {
