@@ -32,6 +32,10 @@ Load.prototype = {
   preload: function() {
     this.game.load.bitmapFont('font', 'asset/bitmapFont/font.png', 'asset/bitmapFont/font.json');
 
+    this.game.load.audio('encourage0', 'asset/sfx/encourage0.wav');
+    this.game.load.audio('encourage1', 'asset/sfx/encourage1.wav');
+    this.game.load.audio('encourage2', 'asset/sfx/encourage2.wav');
+
     this.game.load.image('tiles', 'asset/tiles.png');
     this.game.load.image('logo', 'asset/gameLogo.png');
 

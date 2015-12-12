@@ -23,6 +23,7 @@ Gameplay.prototype = {
   motivationPerPress: 1.5,
   cartPalette: [0x0078ff, 0x6b76ff, 0x005e00, 0x4d00c8, 0xff0000, 0x00c500],
   baseTimeLeft: 30,
+  encourageSounds: [],
 
   gameStates: ['getReady', 'gameplay', 'playerLose', 'playerWinRound'],
 
@@ -73,6 +74,8 @@ Gameplay.prototype = {
         textTween.start();
       }
     }
+
+    this.encourageSounds[~~(Math.random() * this.encourageSounds.length)].play();
   },
 
   reverseDirection: function () {
@@ -202,6 +205,11 @@ Gameplay.prototype = {
 
     this.map = this.game.add.tilemap('level0');
     this.map.addTilesetImage('tiles', 'tiles');
+
+    this.encourageSounds = [];
+    this.encourageSounds.push(this.game.add.audio('encourage0'));
+    this.encourageSounds.push(this.game.add.audio('encourage1'));
+    this.encourageSounds.push(this.game.add.audio('encourage2'));
 
     var backgroundLayer = this.map.createLayer('background');
     var foregroundLayer = this.map.createLayer('foreground');
