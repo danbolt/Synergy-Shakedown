@@ -21,6 +21,9 @@ Gameplay.prototype = {
   motivationPerPress: 1.5,
   cartPalette: [0x0078ff, 0x6b76ff, 0x005e00, 0x4d00c8, 0xff0000, 0x00c500],
 
+  gameStates: ['getReady', 'gameplay', 'playerLose', 'playerWinRound'],
+
+  currentState: 'undef',
   targetPlayerIndex: 0,
   movingForward: false,
   timeSinceLastDownPress: 0,
@@ -29,6 +32,10 @@ Gameplay.prototype = {
 
   motivateDev: function () {
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.X) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_5)) {
+      return;
+    }
+
+    if (this.currentState !== 'gameplay') {
       return;
     }
 
@@ -60,8 +67,50 @@ Gameplay.prototype = {
     this.gameProgress += value;
   },
 
+  // state transitions
+  transition_getReady: function () {
+    if (this.currentState !== 'undef' && this.currentState !== 'playerWinRound') {
+      return;
+    }
+
+    console.log('get ready!');
+
+    this.getReadyText.renderable = true;
+    this.getReadyText.y = -20;
+    var moveTextDownTween = this.game.add.tween(this.getReadyText);
+    moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
+    var moveTextUpTween = this.game.add.tween(this.getReadyText);
+    moveTextUpTween.to({y: -20}, 350, undefined, false, 1500);
+    moveTextDownTween.chain(moveTextUpTween);
+    moveTextUpTween.onComplete.add(function() {
+      this.getReadyText.renderable = false;
+
+      this.game.time.events.add(350, function () {
+        this.transition_startGameplay();
+      }, this);
+    }, this);
+    moveTextDownTween.start();
+
+    this.currentState = 'getReady';
+  },
+  transition_startGameplay: function () {
+    this.developers.forEach(function (dev) { dev.startWorking(); }, this);
+
+    this.currentState = 'gameplay';
+  },
+  transition_playerLose: function () {
+    //
+
+    this.currentState = 'playerLose';
+  },
+  transition_playerWinRound: function () {
+    this.developers.forEach(function (dev) { dev.stopWorking(); }, this);
+
+    this.currentState = 'playerWinRound';
+  },
+
   create: function () {
-    this.game.stage.backgroundColor = '#DDDDDD';
+    this.game.stage.backgroundColor = '#000000';
 
     this.map = this.game.add.tilemap('level0');
     this.map.addTilesetImage('tiles', 'tiles');
@@ -125,7 +174,6 @@ Gameplay.prototype = {
           that.game.time.events.remove(newDev.bobLoop);
           newDev.workLoop = null;
         };
-        newDev.startWorking();
         newDev.events.onKilled.add(function () { this.healthBar.kill(); }, newDev);
 
         this.developers.push(newDev);
@@ -159,7 +207,6 @@ Gameplay.prototype = {
     this.playerSprite.animations.play('run');
 
     var progressText = this.game.add.bitmapText(14 * 16 + 16, 0.75, 'font', 'PROGRESS', 8);
-    progressText.tint = 0x000000;
     progressText.cacheAsBitmap = true;
     this.guiSprites.add(progressText);
 
@@ -168,6 +215,15 @@ Gameplay.prototype = {
     progressCart.anchor.x = 0.5;
     this.progress = progressCart;
     this.progress.crop(new Phaser.Rectangle(0, 0, 64, 0));
+
+    var getReadyText = this.game.add.bitmapText(14 * 16 / 2, 0, 'font', 'THE DEVS ARE TIRED\nBUT WE GOTTA SHIP!!!', 8);
+    getReadyText.align = 'center';
+    getReadyText.anchor.x = 0.5;
+    getReadyText.tint = 0x000000;
+    getReadyText.renderable = false;
+    this.getReadyText = getReadyText;
+    this.guiSprites.addChild(getReadyText);
+    this.guiSprites.bringToTop(getReadyText);
 
     this.workGlimmers = this.game.add.group();
     for (var i = 0; i < 10; i++) {
@@ -182,6 +238,8 @@ Gameplay.prototype = {
     this.targetPlayerIndex = 0;
     this.movingForward = true;
     this.timeSinceLastDownPress = 0;
+
+    this.transition_getReady();
   },
   update: function () {
 
@@ -208,15 +266,17 @@ Gameplay.prototype = {
       } while (loopLimiter < this.developers.length && this.developers[this.targetPlayerIndex].alive === false);
     }
 
-    this.developers.forEach(function(dev) {
-      if (dev.motivation > 0) {
-        dev.motivation -= this.game.time.physicsElapsed * dev.motivationScale;
-        dev.bar.height = 30 * dev.motivation / 20;
-      } else {
-        dev.stopWorking();
-        dev.kill();
-      }
-    }, this);
+    if (this.currentState === 'gameplay') {
+      this.developers.forEach(function(dev) {
+        if (dev.motivation > 0) {
+          dev.motivation -= this.game.time.physicsElapsed * dev.motivationScale;
+          dev.bar.height = 30 * dev.motivation / 20;
+        } else {
+          dev.stopWorking();
+          dev.kill();
+        }
+      }, this);
+    }
 
     this.progress.cropRect.height = 40 * this.gameProgress;
     this.progress.updateCrop();
