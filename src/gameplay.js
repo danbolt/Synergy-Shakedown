@@ -14,7 +14,7 @@ Gameplay.prototype = {
   playerCloseDistance: 8,
   initialDevMotivation: 20,
   baseDevMotiovationScale: 1.5,
-  baseDevProgressValue: 0.001,
+  baseDevProgressValue: 0.01,
   baseDevProgressInterval: 700, // ms
   maxDevMotivation: 20,
   motivationPerPress: 1.5,
@@ -142,9 +142,15 @@ Gameplay.prototype = {
     this.playerSprite.animations.add('run', [0, 1], 7, true);
     this.playerSprite.animations.play('run');
 
-    var progressText = this.game.add.bitmapText(14 * 16 + 16, 16 + 0.75, 'font', 'PROGRESS', 8);
+    var progressText = this.game.add.bitmapText(14 * 16 + 16, 0.75, 'font', 'PROGRESS', 8);
     progressText.tint = 0x000000;
     progressText.cacheAsBitmap = true;
+    this.guiSprites.add(progressText);
+
+    var progressCart = this.game.add.sprite(14 * 16 + (this.game.width - 14 * 16) / 2, 32, 'carts', ~~(Math.random() * 6));
+    progressCart.anchor.x = 0.5;
+    this.progress = progressCart;
+    this.progress.crop(new Phaser.Rectangle(0, 0, 64, 0));
 
     this.targetPlayerIndex = 0;
     this.movingForward = true;
@@ -185,13 +191,16 @@ Gameplay.prototype = {
       }
     }, this);
 
+    this.progress.cropRect.height = 40 * this.gameProgress;
+    this.progress.updateCrop();
+
     // round position values later
     this.playerSprite.x = ~~(this.player.x);
     this.playerSprite.y = ~~(this.player.y);
   },
   render: function () {
-    this.game.debug.geom(new Phaser.Rectangle(0, 0, this.game.width, 16), '#333333');
-    this.game.debug.geom(new Phaser.Rectangle(0, 0, this.game.width * this.gameProgress, 16), 'pink');
+    //this.game.debug.geom(new Phaser.Rectangle(0, 0, this.game.width, 16), '#333333');
+    //this.game.debug.geom(new Phaser.Rectangle(0, 0, this.game.width * this.gameProgress, 16), 'pink');
   },
   shutdown: function () {
     this.player = null;
