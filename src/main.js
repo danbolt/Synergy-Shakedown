@@ -33,6 +33,7 @@ Load.prototype = {
     this.game.load.bitmapFont('font', 'asset/bitmapFont/font.png', 'asset/bitmapFont/font.json');
 
     this.game.load.image('tiles', 'asset/tiles.png');
+    this.game.load.image('logo', 'asset/gameLogo.png');
 
     this.game.load.spritesheet('sheet', 'asset/spriteSheet.png', 16, 32);
     this.game.load.spritesheet('carts', 'asset/carts.png', 64, 40);
@@ -48,10 +49,9 @@ var TitleScreen = function () {};
 TitleScreen.prototype = {
   create: function() {
     this.game.stage.backgroundColor = '#191919';
-
-    var titleText = this.game.add.bitmapText(this.game.width / 2, this.game.height / 2, 'font', 'Synergy Shakedown', 8);
-    titleText.anchor.x = 0.5;
-    titleText.align = 'center';
+    
+    var gameLogo = this.game.add.image(this.game.width / 2, this.game.height / 2, 'logo');
+    gameLogo.anchor.setTo(0.5, 0.75);
 
     var titleText2 = this.game.add.bitmapText(this.game.width / 2, this.game.height / 2 + 16, 'font', 'Hold X to move\ndouble tap X to turn around\n\nRapidly tap C to encourage a dev', 8);
     titleText2.anchor.x = 0.5;
