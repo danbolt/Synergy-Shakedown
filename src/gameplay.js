@@ -20,6 +20,7 @@ Gameplay.prototype = {
   maxDevMotivation: 20,
   motivationPerPress: 1.5,
   cartPalette: [0x0078ff, 0x6b76ff, 0x005e00, 0x4d00c8, 0xff0000, 0x00c500],
+  baseTimeLeft: 30,
 
   gameStates: ['getReady', 'gameplay', 'playerLose', 'playerWinRound'],
 
@@ -29,6 +30,7 @@ Gameplay.prototype = {
   timeSinceLastDownPress: 0,
   gameProgress: 0, /* between 0 and 1 */
   cartRoll: 0,
+  timeLeft: 30,
 
   motivateDev: function () {
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.X) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_5)) {
@@ -80,7 +82,7 @@ Gameplay.prototype = {
       return;
     }
 
-    this.getReadyText.text = 'THE DEVS ARE TIRED\nBUT WE GOTTA SHIP!!!';
+    this.getReadyText.text = 'THE DEVS ARE TIRED\n\nBUT WE GOTTA SHIP!!!';
     this.getReadyText.renderable = true;
     this.getReadyText.y = -20;
     var moveTextDownTween = this.game.add.tween(this.getReadyText);
@@ -101,17 +103,25 @@ Gameplay.prototype = {
     this.cartRoll = ~~(Math.random() * 6);
     this.progress.frame = this.cartRoll;
 
+    this.timeLeft = this.baseTimeLeft;
+    this.timerText.text = this.timeLeft.toString();
+
     this.currentState = 'getReady';
   },
   transition_startGameplay: function () {
     this.developers.forEach(function (dev) { dev.startWorking(); }, this);
 
+    this.timeSubtractLoop = this.game.time.events.loop(1000, function() {
+      this.timeLeft--;
+      this.timerText.text = this.timeLeft.toString();
+    }, this);
+
     this.currentState = 'gameplay';
   },
-  transition_playerLose: function () {
+  transition_playerLose: function (message) {
     this.developers.forEach(function (dev) { if (dev.alive === false) { return; } dev.stopWorking(); }, this);
 
-    this.getReadyText.text = 'No devs left!\n\nThe game didn\'t ship!';
+    this.getReadyText.text = message;
     this.getReadyText.renderable = true;
     this.getReadyText.y = -20;
     var moveTextDownTween = this.game.add.tween(this.getReadyText);
@@ -127,6 +137,9 @@ Gameplay.prototype = {
       }, this);
     }, this);
     moveTextDownTween.start();
+
+    this.game.time.events.remove(this.timeSubtractLoop);
+    this.timerText.text = 'xxx';
 
     this.currentState = 'playerLose';
   },
@@ -149,6 +162,9 @@ Gameplay.prototype = {
       }, this);
     }, this);
     moveTextDownTween.start();
+
+    this.game.time.events.remove(this.timeSubtractLoop);
+    this.timerText.text = '---';
 
     this.currentState = 'playerWinRound';
   },
@@ -270,6 +286,17 @@ Gameplay.prototype = {
     this.guiSprites.addChild(getReadyText);
     this.guiSprites.bringToTop(getReadyText);
 
+    var timerTextLabel = this.game.add.bitmapText(14 * 16 + (this.game.width - (14 * 16)) / 2, this.game.height / 2, 'font', 'TIME', 8);
+    timerTextLabel.align = 'center';
+    timerTextLabel.anchor.x = 0.5;
+    this.guiSprites.addChild(timerTextLabel);
+
+    var timerText = this.game.add.bitmapText(0, 16, 'font', '000', 8);
+    timerText.align = 'center';
+    timerText.anchor.x = 0.5;
+    timerTextLabel.addChild(timerText);
+    this.timerText = timerText;
+
     this.workGlimmers = this.game.add.group();
     for (var i = 0; i < 10; i++) {
       var glimmer = this.game.add.sprite(0, 0, 'sheet', 24);
@@ -277,6 +304,7 @@ Gameplay.prototype = {
       glimmer.kill();
       glimmer.animations.add('glisten', [24, 25, 26, 27], 8); // 500 ms long
       glimmer.tint = this.cartPalette[this.cartRoll];
+      glimmer.alpha = 0.825;
       this.workGlimmers.add(glimmer);
     }
 
@@ -329,7 +357,11 @@ Gameplay.prototype = {
         }
       }
       if (aliveDevsCount === 0) {
-        this.transition_playerLose();
+        this.transition_playerLose('No devs left!\n\nThe game didn\'t ship!');
+      }
+
+      if (this.timeLeft < 0) {
+        this.transition_playerLose('Out of time!\n\nThe game didn\'t ship!');
       }
     }
 
