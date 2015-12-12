@@ -207,9 +207,9 @@ Gameplay.prototype = {
     this.map.addTilesetImage('tiles', 'tiles');
 
     this.encourageSounds = [];
-    this.encourageSounds.push(this.game.add.audio('encourage0'));
-    this.encourageSounds.push(this.game.add.audio('encourage1'));
-    this.encourageSounds.push(this.game.add.audio('encourage2'));
+    this.encourageSounds.push(this.game.add.audio('encourage0', 0.8));
+    this.encourageSounds.push(this.game.add.audio('encourage1', 0.8));
+    this.encourageSounds.push(this.game.add.audio('encourage2', 0.8));
 
     var backgroundLayer = this.map.createLayer('background');
     var foregroundLayer = this.map.createLayer('foreground');

@@ -38,6 +38,8 @@ Load.prototype = {
     this.game.load.audio('encourage1', 'asset/sfx/encourage1.wav');
     this.game.load.audio('encourage2', 'asset/sfx/encourage2.wav');
 
+    this.game.load.audio('background_melody', 'asset/bgm/melody.mp3');
+
     this.game.load.image('tiles', 'asset/tiles.png');
     this.game.load.image('logo', 'asset/gameLogo.png');
 
@@ -47,6 +49,9 @@ Load.prototype = {
     this.game.load.tilemap('level0', 'asset/level0.json', undefined, Phaser.Tilemap.TILED_JSON);
   },
   create: function() {
+    this.game.bgmMelody = this.game.add.audio('background_melody', 0.8, true);
+    this.game.bgmMelody.play();
+
     this.game.state.start('TitleScreen');
   }
 };
