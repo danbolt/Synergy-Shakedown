@@ -61,7 +61,7 @@ TitleScreen.prototype = {
   create: function() {
     this.game.stage.backgroundColor = '#191919';
 
-    var taglines = ['a crunch-time morale boost!', 'last-minute leadership!', 'gotta ship that game!', 'cheer up your team!'];
+    var taglines = ['a crunch-time morale boost!', 'you are the manager!', 'last-minute leadership!', 'help your team ship the game!', 'cheer up your team!'];
     var titleText = this.game.add.bitmapText(this.game.width / 2, this.game.height / 2 + 4, 'font', taglines[~~(Math.random() * taglines.length)], 8);
     titleText.anchor.x = 0.5;
     titleText.align = 'center';

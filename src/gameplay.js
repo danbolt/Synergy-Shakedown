@@ -127,22 +127,41 @@ Gameplay.prototype = {
       return;
     }
 
-    this.getReadyText.text = 'THE DEVS ARE TIRED\n\nBUT WE GOTTA SHIP!!!';
-    this.getReadyText.renderable = true;
-    this.getReadyText.y = -30;
-    var moveTextDownTween = this.game.add.tween(this.getReadyText);
-    moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
-    var moveTextUpTween = this.game.add.tween(this.getReadyText);
-    moveTextUpTween.to({y: -30}, 350, undefined, false, 1500);
-    moveTextDownTween.chain(moveTextUpTween);
-    moveTextUpTween.onComplete.add(function() {
-      this.getReadyText.renderable = false;
+    if (this.currentState === 'undef') {
+      this.getReadyText.text = 'THE DEVS ARE TIRED\n\nBUT WE GOTTA SHIP!!!';
+      this.getReadyText.renderable = true;
+      this.getReadyText.y = -30;
+      var moveTextDownTween = this.game.add.tween(this.getReadyText);
+      moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
+      var moveTextUpTween = this.game.add.tween(this.getReadyText);
+      moveTextUpTween.to({y: -30}, 350, undefined, false, 2200);
+      moveTextDownTween.chain(moveTextUpTween);
+      moveTextUpTween.onComplete.add(function() {
+        this.getReadyText.renderable = false;
 
-      this.game.time.events.add(350, function () {
-        this.transition_startGameplay();
+        this.game.time.events.add(350, function () {
+          this.transition_startGameplay();
+        }, this);
       }, this);
-    }, this);
-    moveTextDownTween.start();
+      moveTextDownTween.start();
+    } else {
+      this.getReadyText.text = 'next round';
+      this.getReadyText.renderable = true;
+      this.getReadyText.y = -30;
+      var moveTextDownTween = this.game.add.tween(this.getReadyText);
+      moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
+      var moveTextUpTween = this.game.add.tween(this.getReadyText);
+      moveTextUpTween.to({y: -30}, 350, undefined, false, 1500);
+      moveTextDownTween.chain(moveTextUpTween);
+      moveTextUpTween.onComplete.add(function() {
+        this.getReadyText.renderable = false;
+
+        this.game.time.events.add(350, function () {
+          this.transition_startGameplay();
+        }, this);
+      }, this);
+      moveTextDownTween.start();
+    }
 
     this.gameProgress = 0;
     this.cartRoll = ~~(Math.random() * 6);
@@ -389,7 +408,7 @@ Gameplay.prototype = {
       this.workGlimmers.add(glimmer);
     }
 
-    var encouragement = ['yay', 'go go go', 'nice', 'good', 'ludum', 'ship', 'good', 'nice', 'yay', 'yay', 'woo', 'wow', 'good', 'great', 'yeah', 'game!', 'l33t', 'wow', 'nice', 'good', 'good work'];
+    var encouragement = ['yay', 'go go go', 'nice', 'good', 'ludum', 'ship', 'good', 'nice', 'yay', 'yay', 'woo', 'wow', 'good', 'great', 'yeah', 'game!', 'l33t', 'wow', 'nice', 'good', 'good work', 'cool', 'super', 'super', 'yeah', 'code', 'art', 'wow', 'nice', 'good', 'good', 'awesome', '10/10', 'love it', 'cool', 'sweet', 'good work', 'love it', 'great'];
     this.encourageWords = this.game.add.group();
     for (var i = 0; i < 10; i++) {
       var word = this.game.add.bitmapText(0, 0, 'font', 'toto', 8);
