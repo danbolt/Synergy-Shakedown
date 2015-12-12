@@ -109,7 +109,24 @@ Gameplay.prototype = {
     this.currentState = 'gameplay';
   },
   transition_playerLose: function () {
-    //
+    this.developers.forEach(function (dev) { if (dev.alive === false) { return; } dev.stopWorking(); }, this);
+
+    this.getReadyText.text = 'No devs left!\n\nThe game didn\'t ship!';
+    this.getReadyText.renderable = true;
+    this.getReadyText.y = -20;
+    var moveTextDownTween = this.game.add.tween(this.getReadyText);
+    moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
+    var moveTextUpTween = this.game.add.tween(this.getReadyText);
+    moveTextUpTween.to({y: -20}, 350, undefined, false, 1500);
+    moveTextDownTween.chain(moveTextUpTween);
+    moveTextUpTween.onComplete.add(function() {
+      this.getReadyText.renderable = false;
+
+      this.game.time.events.add(500, function () {
+        this.game.state.start('Gameplay');
+      }, this);
+    }, this);
+    moveTextDownTween.start();
 
     this.currentState = 'playerLose';
   },
@@ -202,7 +219,7 @@ Gameplay.prototype = {
           that.game.time.events.remove(newDev.bobLoop);
           newDev.workLoop = null;
         };
-        newDev.events.onKilled.add(function () { this.healthBar.kill(); }, newDev);
+        newDev.events.onKilled.add(function () { this.stopWorking(); this.healthBar.kill(); }, newDev);
 
         this.developers.push(newDev);
 
@@ -304,6 +321,16 @@ Gameplay.prototype = {
           dev.kill();
         }
       }, this);
+
+      var aliveDevsCount = 0;
+      for (var i = 0; i < this.developers.length ; i++) {
+        if (this.developers[i].alive) {
+          aliveDevsCount++;
+        }
+      }
+      if (aliveDevsCount === 0) {
+        this.transition_playerLose();
+      }
     }
 
     this.progress.cropRect.height = 40 * this.gameProgress;
@@ -312,10 +339,6 @@ Gameplay.prototype = {
     // round position values later
     this.playerSprite.x = ~~(this.player.x);
     this.playerSprite.y = ~~(this.player.y);
-  },
-  render: function () {
-    //this.game.debug.geom(new Phaser.Rectangle(0, 0, this.game.width, 16), '#333333');
-    //this.game.debug.geom(new Phaser.Rectangle(0, 0, this.game.width * this.gameProgress, 16), 'pink');
   },
   shutdown: function () {
     this.player = null;
@@ -326,9 +349,11 @@ Gameplay.prototype = {
 
     this.targetPlayerIndex = 0;
 
-    this.motivateKey.removeAll();
+    this.motivateKey.onDown.removeAll();
     this.motivateKey = null;
-    this.moveKey.removeAll();
+    this.moveKey.onDown.removeAll();
     this.moveKey = null;
+
+    this.currentState = 'undef';
   }
 };
