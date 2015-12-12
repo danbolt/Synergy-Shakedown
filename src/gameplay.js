@@ -157,7 +157,7 @@ Gameplay.prototype = {
       this.getReadyText.renderable = false;
 
       this.game.time.events.add(500, function () {
-        this.game.state.start('Gameplay');
+        this.game.state.start('TitleScreen');
       }, this);
     }, this);
     moveTextDownTween.start();
@@ -198,7 +198,7 @@ Gameplay.prototype = {
   },
 
   create: function () {
-    this.game.stage.backgroundColor = '#000000';
+    this.game.stage.backgroundColor = '#191919';
 
     this.map = this.game.add.tilemap('level0');
     this.map.addTilesetImage('tiles', 'tiles');
