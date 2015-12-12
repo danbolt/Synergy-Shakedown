@@ -8,6 +8,7 @@ Gameplay.prototype = {
   playerSprite: null,
 
   guiSprites: null,
+  workGlimmers: null,
 
   developerCount: 6,
   playerMoveSpeed: 200,
@@ -18,11 +19,13 @@ Gameplay.prototype = {
   baseDevProgressInterval: 700, // ms
   maxDevMotivation: 20,
   motivationPerPress: 1.5,
+  cartPalette: [0x0078ff, 0x6b76ff, 0x005e00, 0x4d00c8, 0xff0000, 0x00c500],
 
   targetPlayerIndex: 0,
   movingForward: false,
   timeSinceLastDownPress: 0,
   gameProgress: 0, /* between 0 and 1 */
+  cartRoll: 0,
 
   motivateDev: function () {
     if (this.game.input.keyboard.isDown(Phaser.KeyCode.X) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_5)) {
@@ -101,7 +104,20 @@ Gameplay.prototype = {
 
           var bobbed = false;
           var initY = newDev.y;
-          newDev.workLoop = that.game.time.events.loop(newDev.progressInterval, function() { that.addGameProgress( newDev.progressValue ); }, that);
+          newDev.workLoop = that.game.time.events.loop(newDev.progressInterval, function() {
+            that.addGameProgress( newDev.progressValue );
+            var newGlimmer = that.workGlimmers.getFirstDead();
+            if (newGlimmer) {
+              newGlimmer.x = newDev.x;
+              newGlimmer.y = newDev.y;
+              newGlimmer.revive();
+              newGlimmer.animations.play('glisten');
+              var glimmerTween = this.game.add.tween(newGlimmer);
+              glimmerTween.to({x: this.progress.x - (Math.random() * this.progress.width - this.progress.width / 2), y: this.progress.y + this.progress.height}, 500, undefined, false);
+              glimmerTween.onComplete.add(function() { newGlimmer.kill(); }, this);
+              glimmerTween.start();
+            }
+          }, that);
           newDev.bobLoop = that.game.time.events.loop(125, function () { bobbed = !bobbed; newDev.y = initY + (bobbed ? 1 : 0); }, that);
         };
         newDev.stopWorking = function () {
@@ -147,10 +163,21 @@ Gameplay.prototype = {
     progressText.cacheAsBitmap = true;
     this.guiSprites.add(progressText);
 
-    var progressCart = this.game.add.sprite(14 * 16 + (this.game.width - 14 * 16) / 2, 32, 'carts', ~~(Math.random() * 6));
+    this.cartRoll = ~~(Math.random() * 6);
+    var progressCart = this.game.add.sprite(14 * 16 + (this.game.width - 14 * 16) / 2, 32, 'carts', this.cartRoll);
     progressCart.anchor.x = 0.5;
     this.progress = progressCart;
     this.progress.crop(new Phaser.Rectangle(0, 0, 64, 0));
+
+    this.workGlimmers = this.game.add.group();
+    for (var i = 0; i < 10; i++) {
+      var glimmer = this.game.add.sprite(0, 0, 'sheet', 24);
+      glimmer.anchor.set(0.5);
+      glimmer.kill();
+      glimmer.animations.add('glisten', [24, 25, 26, 27], 8); // 500 ms long
+      glimmer.tint = this.cartPalette[this.cartRoll];
+      this.workGlimmers.add(glimmer);
+    }
 
     this.targetPlayerIndex = 0;
     this.movingForward = true;
