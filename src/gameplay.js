@@ -398,6 +398,15 @@ Gameplay.prototype = {
       this.encourageWords.add(word);
     }
 
+    this.game.world.sendToBack(this.guiSprites);
+    this.game.world.sendToBack(this.workGlimmers);
+    this.game.world.sendToBack(this.player);
+    this.game.world.sendToBack(this.yayEmitter);
+    this.game.world.sendToBack(cosmeticLayer);
+    this.developers.forEach(function (dev) { this.game.world.sendToBack(dev); }, this);
+    this.game.world.sendToBack(foregroundLayer);
+    this.game.world.sendToBack(backgroundLayer);
+
     this.targetPlayerIndex = 0;
     this.movingForward = true;
     this.timeSinceLastDownPress = 0;
