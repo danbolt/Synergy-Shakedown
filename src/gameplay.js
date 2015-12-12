@@ -9,6 +9,7 @@ Gameplay.prototype = {
 
   guiSprites: null,
   workGlimmers: null,
+  yayEmitter: null,
 
   developerCount: 6,
   playerMoveSpeed: 200,
@@ -53,6 +54,8 @@ Gameplay.prototype = {
       closestDev.motivation = Math.min(this.maxDevMotivation, closestDev.motivation + this.motivationPerPress);
 
       this.playerSprite.animations.play('encourage');
+
+      this.yayEmitter.emitParticle();
     }
   },
 
@@ -268,6 +271,11 @@ Gameplay.prototype = {
 
     var cosmeticLayer = this.map.createLayer('cosmetic');
 
+    this.yayEmitter = this.game.add.emitter(px, py, 100);
+    this.yayEmitter.makeParticles('sheet', [24, 25]);
+    this.yayEmitter.minRotation = 0;
+    this.yayEmitter.maxRotation = 0;
+
     this.player = this.game.add.sprite(px, py + 16, undefined);
     this.game.physics.arcade.enable(this.player);
     this.player.body.setSize(16, 16);
@@ -397,6 +405,8 @@ Gameplay.prototype = {
     // round position values later
     this.playerSprite.x = ~~(this.player.x);
     this.playerSprite.y = ~~(this.player.y);
+    this.yayEmitter.x = this.playerSprite.x;
+    this.yayEmitter.y = this.playerSprite.y;
   },
   shutdown: function () {
     this.player = null;
