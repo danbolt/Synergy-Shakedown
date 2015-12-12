@@ -62,9 +62,16 @@ Gameplay.prototype = {
   },
 
   addGameProgress: function (value) {
-    if (this.gameProgress >= 1) { return; }
+    if (this.currentState !== 'gameplay') {
+      return;
+    }
 
     this.gameProgress += value;
+
+    if (this.gameProgress > 1) {
+      this.gameProgress = 1;
+      this.transition_playerWinRound();
+    }
   },
 
   // state transitions
@@ -73,8 +80,7 @@ Gameplay.prototype = {
       return;
     }
 
-    console.log('get ready!');
-
+    this.getReadyText.text = 'THE DEVS ARE TIRED\nBUT WE GOTTA SHIP!!!';
     this.getReadyText.renderable = true;
     this.getReadyText.y = -20;
     var moveTextDownTween = this.game.add.tween(this.getReadyText);
@@ -91,6 +97,10 @@ Gameplay.prototype = {
     }, this);
     moveTextDownTween.start();
 
+    this.gameProgress = 0;
+    this.cartRoll = ~~(Math.random() * 6);
+    this.progress.frame = this.cartRoll;
+
     this.currentState = 'getReady';
   },
   transition_startGameplay: function () {
@@ -105,6 +115,23 @@ Gameplay.prototype = {
   },
   transition_playerWinRound: function () {
     this.developers.forEach(function (dev) { dev.stopWorking(); }, this);
+
+    this.getReadyText.text = 'Nice one!\nNext game coming up!';
+    this.getReadyText.renderable = true;
+    this.getReadyText.y = -20;
+    var moveTextDownTween = this.game.add.tween(this.getReadyText);
+    moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
+    var moveTextUpTween = this.game.add.tween(this.getReadyText);
+    moveTextUpTween.to({y: -20}, 350, undefined, false, 1500);
+    moveTextDownTween.chain(moveTextUpTween);
+    moveTextUpTween.onComplete.add(function() {
+      this.getReadyText.renderable = false;
+
+      this.game.time.events.add(350, function () {
+        this.transition_getReady();
+      }, this);
+    }, this);
+    moveTextDownTween.start();
 
     this.currentState = 'playerWinRound';
   },
@@ -159,6 +186,7 @@ Gameplay.prototype = {
             if (newGlimmer) {
               newGlimmer.x = newDev.x;
               newGlimmer.y = newDev.y;
+              newGlimmer.tint = this.cartPalette[this.cartRoll];
               newGlimmer.revive();
               newGlimmer.animations.play('glisten');
               var glimmerTween = this.game.add.tween(newGlimmer);
@@ -216,7 +244,7 @@ Gameplay.prototype = {
     this.progress = progressCart;
     this.progress.crop(new Phaser.Rectangle(0, 0, 64, 0));
 
-    var getReadyText = this.game.add.bitmapText(14 * 16 / 2, 0, 'font', 'THE DEVS ARE TIRED\nBUT WE GOTTA SHIP!!!', 8);
+    var getReadyText = this.game.add.bitmapText(14 * 16 / 2, 0, 'font', 'foo', 8);
     getReadyText.align = 'center';
     getReadyText.anchor.x = 0.5;
     getReadyText.tint = 0x000000;
