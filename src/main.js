@@ -19,7 +19,7 @@ Preload.prototype = {
 
     PIXI.scaleModes.DEFAULT = PIXI.scaleModes.NEAREST; //for WebGL
 
-    var loadText = this.game.add.bitmapText(this.game.width / 2, this.game.height / 2 + 4, 'font', 'loading...', 8);
+    var loadText = this.game.add.bitmapText(this.game.width / 2, this.game.height / 2 + 4, 'font', 'loading...\n\n(this might take a moment!)', 8);
     loadText.anchor.x = 0.5;
     loadText.align = 'center';
     this.game.time.events.loop(250, function () { loadText.renderable = !(loadText.renderable); });
