@@ -131,11 +131,11 @@ Gameplay.prototype = {
     if (this.currentState === 'undef') {
       this.getReadyText.text = 'THE DEVS ARE TIRED\n\nBUT WE GOTTA SHIP!!!';
       this.getReadyText.renderable = true;
-      this.getReadyText.y = -30;
+      this.getReadyText.y = -50;
       var moveTextDownTween = this.game.add.tween(this.getReadyText);
       moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
       var moveTextUpTween = this.game.add.tween(this.getReadyText);
-      moveTextUpTween.to({y: -30}, 350, undefined, false, 2200);
+      moveTextUpTween.to({y: -50}, 350, undefined, false, 2200);
       moveTextDownTween.chain(moveTextUpTween);
       moveTextUpTween.onComplete.add(function() {
         this.getReadyText.renderable = false;
@@ -146,13 +146,13 @@ Gameplay.prototype = {
       }, this);
       moveTextDownTween.start();
     } else {
-      this.getReadyText.text = 'next round';
+      this.getReadyText.text = 'next round\n\nproduct ' + this.currentRound;
       this.getReadyText.renderable = true;
-      this.getReadyText.y = -30;
+      this.getReadyText.y = -50;
       var moveTextDownTween = this.game.add.tween(this.getReadyText);
       moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
       var moveTextUpTween = this.game.add.tween(this.getReadyText);
-      moveTextUpTween.to({y: -30}, 350, undefined, false, 1500);
+      moveTextUpTween.to({y: -50}, 350, undefined, false, 1500);
       moveTextDownTween.chain(moveTextUpTween);
       moveTextUpTween.onComplete.add(function() {
         this.getReadyText.renderable = false;
@@ -192,11 +192,11 @@ Gameplay.prototype = {
 
     this.getReadyText.text = message;
     this.getReadyText.renderable = true;
-    this.getReadyText.y = -30;
+    this.getReadyText.y = -50;
     var moveTextDownTween = this.game.add.tween(this.getReadyText);
     moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
     var moveTextUpTween = this.game.add.tween(this.getReadyText);
-    moveTextUpTween.to({y: -30}, 350, undefined, false, 1500);
+    moveTextUpTween.to({y: -50}, 350, undefined, false, 1500);
     moveTextDownTween.chain(moveTextUpTween);
     moveTextUpTween.onComplete.add(function() {
       this.getReadyText.renderable = false;
@@ -219,13 +219,13 @@ Gameplay.prototype = {
   transition_playerWinRound: function () {
     this.developers.forEach(function (dev) { dev.stopWorking(); }, this);
 
-    this.getReadyText.text = 'Nice one!\nNext game coming up!';
+    this.getReadyText.text = 'Nice one!\n\nNext game coming up!';
     this.getReadyText.renderable = true;
-    this.getReadyText.y = -30;
+    this.getReadyText.y = -50;
     var moveTextDownTween = this.game.add.tween(this.getReadyText);
     moveTextDownTween.to({y: ~~(this.game.height * 0.333)}, 500);
     var moveTextUpTween = this.game.add.tween(this.getReadyText);
-    moveTextUpTween.to({y: -30}, 350, undefined, false, 1500);
+    moveTextUpTween.to({y: -50}, 350, undefined, false, 1500);
     moveTextDownTween.chain(moveTextUpTween);
     moveTextUpTween.onComplete.add(function() {
       this.getReadyText.renderable = false;
@@ -386,10 +386,18 @@ Gameplay.prototype = {
     this.progress = progressCart;
     this.progress.crop(new Phaser.Rectangle(0, 0, 64, 0));
 
+    var getReadyBacking = this.game.add.sprite(14 * 16 / 2 - 128, 0, 'cutscenes', 0);
+    getReadyBacking.tint = 0x000000;
+    getReadyBacking.anchor.x = 0.5;
+    getReadyBacking.width = 192;
+    getReadyBacking.height = 64;
+    this.getReadyBacking = getReadyBacking;
+    this.guiSprites.addChild(getReadyBacking);
+
     var getReadyText = this.game.add.bitmapText(14 * 16 / 2, 0, 'font', 'foo', 8);
     getReadyText.align = 'center';
     getReadyText.anchor.x = 0.5;
-    getReadyText.tint = 0x000000;
+    getReadyText.tint = 0xFFFFFF;
     getReadyText.renderable = false;
     this.getReadyText = getReadyText;
     this.guiSprites.addChild(getReadyText);
@@ -512,6 +520,9 @@ Gameplay.prototype = {
 
     this.progress.cropRect.height = 40 * this.gameProgress;
     this.progress.updateCrop();
+
+    this.getReadyBacking.x = this.getReadyText.x;
+    this.getReadyBacking.y = this.getReadyText.y - 16;
 
     // round position values later
     this.playerSprite.x = ~~(this.player.x);
