@@ -129,6 +129,13 @@ CutScene.prototype = {
       }
     };
 
+    this.game.input.gamepad.onDownCallback = function (buttonCode) {
+      if (buttonCode === Phaser.Gamepad.XBOX360_START) {
+        this.game.state.start('TitleScreen');
+        escKey.onDown.removeAll();
+      }
+    };
+
     bipLoop = this.game.time.events.loop(100, bipAndLoopFunction, this);
   }
 };

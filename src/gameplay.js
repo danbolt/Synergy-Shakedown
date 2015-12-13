@@ -406,7 +406,7 @@ Gameplay.prototype = {
     this.roundText = roundText;
     this.guiSprites.bringToTop(getReadyText);
 
-    var timerTextLabel = this.game.add.bitmapText(14 * 16 + (this.game.width - (14 * 16)) / 2, this.game.height / 2 + 48 + 32, 'font', 'HOURS LEFT', 8);
+    var timerTextLabel = this.game.add.bitmapText(14 * 16 + (this.game.width - (14 * 16)) / 2, this.game.height / 2 + 48 + 32, 'font', 'DEADLINE', 8);
     timerTextLabel.align = 'center';
     timerTextLabel.anchor.x = 0.5;
     this.guiSprites.addChild(timerTextLabel);
