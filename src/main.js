@@ -74,7 +74,7 @@ CutScene.prototype = {
   create: function () {
     this.currentScene = 0;
 
-    this.dialogues = ['you called for me mr.shadowboss?', 'i want you to help the doomed team', 'but they\'re doomed...   ', 'grow some synergy or\nyou\'re fired!!'];
+    this.dialogues = ['you called for me mr.shadowboss?', 'i want you to help the doomed team', 'but they\'re doomed...   ', 'grow some synergy or\nyou\'re fired!!!'];
 
     var scneneSprite = this.game.add.sprite(0, 32, 'cutscenes', 0);
 
