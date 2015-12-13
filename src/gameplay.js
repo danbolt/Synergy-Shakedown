@@ -17,7 +17,7 @@ Gameplay.prototype = {
   playerCloseDistance: 8,
   initialDevMotivation: 20,
   baseDevMotiovationScale: 1.5,
-  baseDevProgressValue: 0.007,
+  baseDevProgressValue: 0.01,
   baseDevProgressInterval: 1000, // ms
   maxDevMotivation: 20,
   motivationPerPress: 1.5,
@@ -57,7 +57,7 @@ Gameplay.prototype = {
         closestDev.motivation = Math.max(0, closestDev.motivation - this.motivationPerPress);
         if (closestDev.motivation === 0) {
           closestDev.demodivated = false;
-          closestDev.motivation = this.maxDevMotivation;
+          closestDev.motivation =  17 + ~~(Math.random() * 4);
           closestDev.frame = 12;
           closestDev.bar.tint = 0x77beFF;
           closestDev.startWorking();
@@ -283,7 +283,7 @@ Gameplay.prototype = {
         newDev.demodivated = false;
         newDev.motivationScale = this.baseDevMotiovationScale + Math.random() * 0.45 - 0.234;
         newDev.progressValue = this.baseDevProgressValue;
-        newDev.progressInterval = this.baseDevProgressInterval + (Math.random() * 600 - 300);
+        newDev.progressInterval = this.baseDevProgressInterval + (Math.random() * 400 - 200);
         newDev.workLoop = null;
         newDev.addChild(this.game.add.sprite(0, 0, 'sheet', ~~(8 + Math.random() * 4))).anchor.setTo(0.5, 0);
         newDev.startWorking = function () {
@@ -469,7 +469,7 @@ Gameplay.prototype = {
           dev.stopWorking();
           dev.demodivated = true;
           dev.frame = 13;
-          dev.motivation = 10;
+          dev.motivation = 17 + ~~(Math.random() * 4);
           dev.bar.tint = 0xb80000;
         }
       }, this);
