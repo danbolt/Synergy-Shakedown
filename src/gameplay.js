@@ -37,7 +37,7 @@ Gameplay.prototype = {
   currentRound: 0,
 
   motivateDev: function () {
-    if (this.game.input.keyboard.isDown(Phaser.KeyCode.X) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_5)) {
+    if (this.game.input.keyboard.isDown(Phaser.KeyCode.X) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_5) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_1)) {
       return;
     }
 
@@ -257,7 +257,7 @@ Gameplay.prototype = {
     this.motivateKey.onDown.add(this.motivateDev, this);
     this.moveKey = this.game.input.keyboard.addKey(Phaser.KeyCode.X);
     this.moveKey.onDown.add(this.reverseDirection, this);
-    this.game.input.gamepad.onDownCallback = function (buttonCode) { if (buttonCode === 4) { this.motivateDev(); } if (buttonCode === 5) { this.reverseDirection(); } };
+    this.game.input.gamepad.onDownCallback = function (buttonCode) { if (buttonCode === 4 || buttonCode === 0) { this.motivateDev(); } if (buttonCode === 5 || buttonCode === 1) { this.reverseDirection(); } };
     this.game.input.gamepad.callbackContext = this;
 
     this.guiSprites = this.game.add.group();
@@ -437,7 +437,7 @@ Gameplay.prototype = {
     this.game.world.bringToTop(this.player);
     this.timeSinceLastDownPress += this.game.time.physicsElapsedMS;
     // move toward the next developer
-    if (this.game.input.keyboard.isDown(Phaser.KeyCode.X) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_5)) {
+    if (this.game.input.keyboard.isDown(Phaser.KeyCode.X) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_5) || this.game.input.gamepad.pad1.isDown(Phaser.Gamepad.BUTTON_1)) {
       var target = this.developers[this.targetPlayerIndex];
 
       Phaser.Point.subtract(target.position, this.player.position, this.player.body.velocity);
