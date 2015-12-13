@@ -22,6 +22,7 @@ Gameplay.prototype = {
   maxDevMotivation: 20,
   motivationPerPress: 1.5,
   cartPalette: [0x0078ff, 0x6b76ff, 0x005e00, 0x4d00c8, 0xff0000, 0x00c500],
+  cartNames: ['Super\nGame', 'Spirit', 'Super\nGame II', 'Hip Hop\nHarpy', 'Super\nGame\nRED', 'Panda\nPost'],
   baseTimeLeft: 30,
   encourageSounds: [],
 
@@ -176,6 +177,8 @@ Gameplay.prototype = {
   },
   transition_startGameplay: function () {
     this.developers.forEach(function (dev) { dev.startWorking(); }, this);
+    
+    this.progressText.text = 'IN DEV:\n\n' + this.cartNames[this.cartRoll]; 
 
     this.timeSubtractLoop = this.game.time.events.loop(1000, function() {
       this.timeLeft--;
@@ -235,6 +238,7 @@ Gameplay.prototype = {
 
     this.game.time.events.remove(this.timeSubtractLoop);
     this.timerText.text = '---';
+    this.progressText.text = 'IN DEV:\n\n-----';
 
     this.currentRound++;
 
@@ -258,6 +262,8 @@ Gameplay.prototype = {
     this.demotivateSounds.push(this.game.add.audio('demotivate0', 0.8));
     this.demotivateSounds.push(this.game.add.audio('demotivate1', 0.8));
     this.demotivateSounds.push(this.game.add.audio('demotivate2', 0.8));
+
+    this.reviveSound = this.game.add.audio('revive', 0.8);
 
     this.winRoundSound = this.game.add.audio('winRound', 0.8);
     this.loseGameSound = this.game.add.audio('playerLose', 0.8); 
@@ -368,12 +374,14 @@ Gameplay.prototype = {
     this.playerSprite.animations.add('sad', [4, 5], 7, true);
     this.playerSprite.animations.play('run');
 
-    var progressText = this.game.add.bitmapText(14 * 16 + 16, 0.75, 'font', 'PROGRESS', 8);
-    progressText.cacheAsBitmap = true;
+    var progressText = this.game.add.bitmapText(14 * 16 + (this.game.width - 14 * 16) / 2, 2, 'font', 'IN DEV:\n\n-----', 8);
+    progressText.align = 'center';
+    progressText.anchor.x = 0.5;
+    this.progressText = progressText;
     this.guiSprites.add(progressText);
 
     this.cartRoll = ~~(Math.random() * 6);
-    var progressCart = this.game.add.sprite(14 * 16 + (this.game.width - 14 * 16) / 2, 32, 'carts', this.cartRoll);
+    var progressCart = this.game.add.sprite(14 * 16 + (this.game.width - 14 * 16) / 2, 32 + 16, 'carts', this.cartRoll);
     progressCart.anchor.x = 0.5;
     this.progress = progressCart;
     this.progress.crop(new Phaser.Rectangle(0, 0, 64, 0));
@@ -385,20 +393,8 @@ Gameplay.prototype = {
     getReadyText.renderable = false;
     this.getReadyText = getReadyText;
     this.guiSprites.addChild(getReadyText);
-    this.guiSprites.bringToTop(getReadyText);
 
-    var timerTextLabel = this.game.add.bitmapText(14 * 16 + (this.game.width - (14 * 16)) / 2, this.game.height / 2, 'font', 'TIME', 8);
-    timerTextLabel.align = 'center';
-    timerTextLabel.anchor.x = 0.5;
-    this.guiSprites.addChild(timerTextLabel);
-
-    var timerText = this.game.add.bitmapText(0, 16, 'font', '000', 8);
-    timerText.align = 'center';
-    timerText.anchor.x = 0.5;
-    timerTextLabel.addChild(timerText);
-    this.timerText = timerText;
-
-    var roundTextLabel = this.game.add.bitmapText(14 * 16 + (this.game.width - (14 * 16)) / 2, this.game.height / 2 + 48, 'font', 'ROUND', 8);
+    var roundTextLabel = this.game.add.bitmapText(14 * 16 + (this.game.width - (14 * 16)) / 2, this.game.height / 2 + 32, 'font', 'PRODUCT', 8);
     roundTextLabel.align = 'center';
     roundTextLabel.anchor.x = 0.5;
     this.guiSprites.addChild(roundTextLabel);
@@ -408,6 +404,18 @@ Gameplay.prototype = {
     roundText.anchor.x = 0.5;
     roundTextLabel.addChild(roundText);
     this.roundText = roundText;
+    this.guiSprites.bringToTop(getReadyText);
+
+    var timerTextLabel = this.game.add.bitmapText(14 * 16 + (this.game.width - (14 * 16)) / 2, this.game.height / 2 + 48 + 32, 'font', 'HOURS LEFT', 8);
+    timerTextLabel.align = 'center';
+    timerTextLabel.anchor.x = 0.5;
+    this.guiSprites.addChild(timerTextLabel);
+
+    var timerText = this.game.add.bitmapText(0, 16, 'font', '000', 8);
+    timerText.align = 'center';
+    timerText.anchor.x = 0.5;
+    timerTextLabel.addChild(timerText);
+    this.timerText = timerText;
 
     this.workGlimmers = this.game.add.group();
     for (var i = 0; i < 10; i++) {
@@ -476,13 +484,14 @@ Gameplay.prototype = {
         dev.bar.height = Math.max(30 * dev.motivation / 20, 1);
 
         if (dev.motivation > 0 && dev.demodivated === false) {
-          dev.motivation -= this.game.time.physicsElapsed * dev.motivationScale;
+          dev.motivation -= this.game.time.physicsElapsed * dev.motivationScale + 0.0025 * (this.currentRound - 1);
         } else if (dev.motivation <= 0 && dev.demodivated === false) {
           dev.stopWorking();
           dev.demodivated = true;
           dev.frame = 13;
           dev.motivation = 17 + ~~(Math.random() * 4);
           dev.bar.tint = 0xb80000;
+          this.demotivateSounds[~~(Math.random() * this.demotivateSounds.length)].play();
         }
       }, this);
 
