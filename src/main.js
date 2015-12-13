@@ -38,6 +38,16 @@ Load.prototype = {
     this.game.load.audio('encourage1', 'asset/sfx/encourage1.wav');
     this.game.load.audio('encourage2', 'asset/sfx/encourage2.wav');
 
+    this.game.load.audio('demotivate0', 'asset/sfx/demotivate0.wav');
+    this.game.load.audio('demotivate1', 'asset/sfx/demotivate1.wav');
+    this.game.load.audio('demotivate2', 'asset/sfx/demotivate2.wav');
+
+    this.game.load.audio('playerLose' , 'asset/sfx/playerLose.wav');
+
+    this.game.load.audio('revive', 'asset/sfx/revive.wav');
+
+    this.game.load.audio('winRound', 'asset/sfx/winRound.wav');
+
     this.game.load.audio('background_melody', 'asset/bgm/melody.mp3');
 
     this.game.load.image('tiles', 'asset/tiles.png');

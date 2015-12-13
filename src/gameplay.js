@@ -206,6 +206,8 @@ Gameplay.prototype = {
 
     this.playerSprite.animations.play('sad');
 
+    this.loseGameSound.play();
+
     this.game.time.events.remove(this.timeSubtractLoop);
     this.timerText.text = 'xxx';
 
@@ -236,6 +238,8 @@ Gameplay.prototype = {
 
     this.currentRound++;
 
+    this.winRoundSound.play();
+
     this.currentState = 'playerWinRound';
   },
 
@@ -249,6 +253,14 @@ Gameplay.prototype = {
     this.encourageSounds.push(this.game.add.audio('encourage0', 0.8));
     this.encourageSounds.push(this.game.add.audio('encourage1', 0.8));
     this.encourageSounds.push(this.game.add.audio('encourage2', 0.8));
+
+    this.demotivateSounds = [];
+    this.demotivateSounds.push(this.game.add.audio('demotivate0', 0.8));
+    this.demotivateSounds.push(this.game.add.audio('demotivate1', 0.8));
+    this.demotivateSounds.push(this.game.add.audio('demotivate2', 0.8));
+
+    this.winRoundSound = this.game.add.audio('winRound', 0.8);
+    this.loseGameSound = this.game.add.audio('playerLose', 0.8); 
 
     var backgroundLayer = this.map.createLayer('background');
     var foregroundLayer = this.map.createLayer('foreground');
