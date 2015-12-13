@@ -87,6 +87,18 @@ CutScene.prototype = {
 
     var dialogueText = this.game.add.bitmapText(32, 186, 'font', '', 8);
 
+    var gamepadText = this.game.add.bitmapText(this.game.width - 4, this.game.height - 4, 'font', '(ESC) to skip', 8);
+    gamepadText.anchor.setTo(1);
+    gamepadText.align = 'right';
+    this.gamepadText = gamepadText;
+
+    var escKey = this.game.input.keyboard.addKey(Phaser.KeyCode.ESC);
+    escKey.onDown.add(function () {
+      this.game.state.start('TitleScreen');
+      escKey.onDown.removeAll();
+    }, this);
+
+
     var bip = 0;
     var bipLoop = undefined;
     var bipAndLoopFunction = function () {
