@@ -44,6 +44,8 @@ Load.prototype = {
 
     this.game.load.audio('playerLose' , 'asset/sfx/playerLose.wav');
 
+    this.game.load.audio('blip' , 'asset/sfx/blip.wav');
+
     this.game.load.audio('revive', 'asset/sfx/revive.wav');
 
     this.game.load.audio('winRound', 'asset/sfx/winRound.wav');
@@ -81,6 +83,8 @@ CutScene.prototype = {
     enterTween.to({x: -16}, 1000);
     enterTween.start();
 
+    var blipSound = this.game.add.audio('blip', 0.5);
+
     var dialogueText = this.game.add.bitmapText(32, 186, 'font', '', 8);
 
     var bip = 0;
@@ -88,11 +92,12 @@ CutScene.prototype = {
     var bipAndLoopFunction = function () {
       dialogueText.text = this.dialogues[this.currentScene].substring(0, bip);
       bip++;
+      blipSound.play();
 
       if (bip === this.dialogues[this.currentScene].length + 1) {
         this.game.time.events.remove(bipLoop);
 
-        this.game.time.events.add((this.currentScene === 4) ? 2000 : 750, function () {
+        this.game.time.events.add((this.currentScene === 4) ? 3500 : 750, function () {
 
           this.currentScene++;
           bip = 0;
