@@ -55,6 +55,7 @@ Load.prototype = {
 
     this.game.load.spritesheet('sheet', 'asset/spriteSheet.png', 16, 32);
     this.game.load.spritesheet('carts', 'asset/carts.png', 64, 40);
+    this.game.load.spritesheet('cutscenes', 'asset/cutscenes.png', 320, 128);
 
     this.game.load.tilemap('level0', 'asset/level0.json', undefined, Phaser.Tilemap.TILED_JSON);
   },
@@ -62,7 +63,56 @@ Load.prototype = {
     this.game.bgmMelody = this.game.add.audio('background_melody', 0.8, true);
     this.game.bgmMelody.play();
 
-    this.game.state.start('TitleScreen');
+    this.game.state.start('CutScene');
+  }
+};
+
+var CutScene = function () {};
+CutScene.prototype = {
+  create: function () {
+    this.currentScene = 0;
+
+    this.dialogues = ['you called for me mr.shadowboss?', 'i want you to help the doomed team', 'but they\'re doomed...   ', 'grow some synergy or\nyou\'re fired!!'];
+
+    var scneneSprite = this.game.add.sprite(0, 32, 'cutscenes', 0);
+
+    var enterAnim = this.game.add.sprite(128, 32, 'cutscenes', 4);
+    var enterTween = this.game.add.tween(enterAnim);
+    enterTween.to({x: -16}, 1000);
+    enterTween.start();
+
+    var dialogueText = this.game.add.bitmapText(32, 186, 'font', '', 8);
+
+    var bip = 0;
+    var bipLoop = undefined;
+    var bipAndLoopFunction = function () {
+      dialogueText.text = this.dialogues[this.currentScene].substring(0, bip);
+      bip++;
+
+      if (bip === this.dialogues[this.currentScene].length + 1) {
+        this.game.time.events.remove(bipLoop);
+
+        this.game.time.events.add((this.currentScene === 4) ? 2000 : 750, function () {
+
+          this.currentScene++;
+          bip = 0;
+
+          if (this.currentScene === 4) {
+            this.game.state.start('TitleScreen');
+          } else {
+            if (this.currentScene === 1) {
+              enterAnim.kill();
+            }
+            scneneSprite.frame = this.currentScene;
+            bipLoop = this.game.time.events.loop(100, bipAndLoopFunction, this);
+            dialogueText.text = '';
+          }
+
+        }, this);
+      }
+    };
+
+    bipLoop = this.game.time.events.loop(100, bipAndLoopFunction, this);
   }
 };
 
@@ -125,7 +175,8 @@ var main = function() {
   var game = new Phaser.Game(320, 240);
   game.state.add('Preload', Preload, false);
   game.state.add('Load', Load, false);
-  game.state.add('TitleScreen', TitleScreen, false)
+  game.state.add('TitleScreen', TitleScreen, false);
+  game.state.add('CutScene', CutScene, false);
   game.state.add('Gameplay', Gameplay, false);
   game.state.start('Preload');
 };
