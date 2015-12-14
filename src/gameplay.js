@@ -167,6 +167,13 @@ Gameplay.prototype = {
     this.gameProgress = 0;
     this.cartRoll = ~~(Math.random() * 6);
     this.progress.frame = this.cartRoll;
+    if (this.cartRoll === 1) {
+      this.progress.inputEnabled = true;
+      this.progress.events.onInputDown.add(function () { window.open('http://spirit-thegame.com/'); }, this);
+    } else {
+      this.progress.inputEnabled = false;
+      this.progress.events.onInputDown.removeAll();
+    }
 
     this.timeLeft = this.baseTimeLeft;
     this.timerText.text = this.timeLeft.toString();
@@ -385,6 +392,13 @@ Gameplay.prototype = {
     progressCart.anchor.x = 0.5;
     this.progress = progressCart;
     this.progress.crop(new Phaser.Rectangle(0, 0, 64, 0));
+    if (this.cartRoll === 1) {
+      this.progress.inputEnabled = true;
+      this.progress.events.onInputDown.add(function () { window.open('http://spirit-thegame.com/'); }, this);
+    } else {
+      this.progress.inputEnabled = false;
+      this.progress.events.onInputDown.removeAll();
+    }
 
     var getReadyBacking = this.game.add.sprite(14 * 16 / 2 - 128, 0, 'cutscenes', 0);
     getReadyBacking.tint = 0x000000;
