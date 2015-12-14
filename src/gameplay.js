@@ -219,7 +219,7 @@ Gameplay.prototype = {
   transition_playerWinRound: function () {
     this.developers.forEach(function (dev) { dev.stopWorking(); }, this);
 
-    this.getReadyText.text = 'Nice one!\n\nNext game coming up!';
+    this.getReadyText.text = 'Nice one! You shipped:\n' + this.cartNames[this.cartRoll];
     this.getReadyText.renderable = true;
     this.getReadyText.y = -50;
     var moveTextDownTween = this.game.add.tween(this.getReadyText);
