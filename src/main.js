@@ -121,6 +121,10 @@ CutScene.prototype = {
               enterAnim.kill();
             }
             scneneSprite.frame = this.currentScene;
+            if (this.currentScene === 3) {
+              scneneSprite.animations.add('flicker', [1, 3], 500, true);
+              scneneSprite.animations.play('flicker');
+            }
             bipLoop = this.game.time.events.loop(100, bipAndLoopFunction, this);
             dialogueText.text = '';
           }
